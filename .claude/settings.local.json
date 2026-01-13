@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(npm start)",
+      "WebFetch(domain:wasabeef.jp)",
+      "Bash(powershell -Command \"Get-Content ''C:\\\\Users\\\\t-ski\\\\.claude\\\\settings.json'' -Raw | ConvertFrom-Json | Out-Null; Write-Host ''OK: JSON is valid''\")",
+      "Bash(jq:*)",
+      "Bash(where.exe jq:*)",
+      "Bash(powershell -Command \"Get-Command jq -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source\")",
+      "WebFetch(domain:zenn.dev)",
+      "Bash(~/.claude/scripts/deny-check.sh)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:gyazo.com)"
+    ],
+    "deny": []
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "seo-research-tool",
+  "version": "1.0.0",
+  "description": "SEOリサーチツール - 検索結果からタイトルとメタディスクリプションを抽出",
+  "main": "index.js",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "dev": "python -m http.server 8000"
+  },
+  "keywords": [
+    "seo",
+    "research",
+    "serp",
+    "meta-description"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "playwright": "^1.57.0"
+  }
+}

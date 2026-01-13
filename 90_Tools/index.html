@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEOリサーチツール</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 SEOリサーチツール</h1>
+            <p>検索結果のタイトルとメタディスクリプションを取得・分析</p>
+        </header>
+
+        <main>
+            <div class="search-section">
+                <div class="search-input-group">
+                    <input 
+                        type="text" 
+                        id="searchKeyword" 
+                        placeholder="検索キーワードを入力（例：生成AI 活用事例）"
+                        class="search-input"
+                    >
+                    <button id="searchButton" class="search-button">検索開始</button>
+                </div>
+                <div class="options">
+                    <label>
+                        <input type="checkbox" id="excludeSNS" checked>
+                        SNSを除外
+                    </label>
+                </div>
+            </div>
+
+            <div id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>検索結果を取得中...</p>
+            </div>
+
+            <div id="results" class="results-section hidden">
+                <h2>検索結果</h2>
+                <div class="export-buttons">
+                    <button id="copyTable" class="export-button">表をコピー</button>
+                    <button id="downloadCSV" class="export-button">CSVダウンロード</button>
+                </div>
+                <div class="table-container">
+                    <table id="resultsTable">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>URL</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <p id="searchDate" class="search-date"></p>
+            </div>
+
+            <div id="error" class="error-message hidden">
+                <p>エラーが発生しました。もう一度お試しください。</p>
+            </div>
+        </main>
+
+        <footer>
+            <p>© 2025 SEOリサーチツール - SERP分析用ツール</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
