@@ -52,6 +52,7 @@ description: Claude Codeのカスタマイズ機能の全体概要と使い分�
 | 原則 | 説明 | 詳細ドキュメント |
 |------|------|-----------------|
 | **Progressive Disclosure** | 情報を段階的に開示し、コンテキストを効率化 | [10_progressive-disclosure.md](10_progressive-disclosure.md) |
+| **Agent Best Practices** | Anthropic公式のエージェント開発ベストプラクティス | [11_agent-best-practices.md](11_agent-best-practices.md) |
 
 ---
 
@@ -248,6 +249,7 @@ Plugin（最低優先）
 | 08 | [08_settings.md](08_settings.md) | Settings & Permissions |
 | 09 | [09_windows-tips.md](09_windows-tips.md) | Windows環境でのClaude Code利用 |
 | 10 | [10_progressive-disclosure.md](10_progressive-disclosure.md) | Progressive Disclosure（段階的開示） |
+| 11 | [11_agent-best-practices.md](11_agent-best-practices.md) | Anthropic公式エージェントベストプラクティス |
 
 ### MCP関連（mcp/）
 
