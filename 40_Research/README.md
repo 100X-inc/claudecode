@@ -6,8 +6,7 @@
 
 | ファイル | 概要 |
 |---------|------|
-| `ReviewDocuments2.md` | レビューメモ2 |
-| `ReviewDocuments3.md` | レビューメモ3 |
+| `claude-code-gaps-2026.md` | 10_Documentで不足している重要概念の調査レポート |
 
 ## 用途
 - 自分で行った技術検証

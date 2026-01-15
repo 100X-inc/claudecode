@@ -18,6 +18,10 @@ description: Agent Skillsの作成方法とトリガー条件
 9. [周辺機能との連携](#9-周辺機能との連携)
 10. [トラブルシューティング](#10-トラブルシューティング)
 11. [ベストプラクティス](#11-ベストプラクティス)
+12. [Progressive Disclosure パターン](#12-progressive-disclosure-パターン)
+13. [アンチパターン](#13-アンチパターン避けるべきこと)
+14. [評価と反復](#14-評価と反復)
+15. [公式リソース](#15-公式リソース)
 
 ---
 
@@ -522,12 +526,32 @@ What Skills are available?
 - 何ができるかを具体的に記述
 - トリガーキーワードを含める
 - 最大1024文字を有効活用
+- 三人称で記述（"Processes...", "Extracts..."）
+- 「何をするか」+「いつ使うか」の両方を含める
+
+### name フィールドの規則
+
+**有効な例:**
+```yaml
+name: pdf-processing
+name: data-analysis
+name: processing-pdfs      # 動名詞形（推奨）
+```
+
+**無効な例:**
+```yaml
+name: PDF-Processing      # 大文字不可
+name: -pdf                # ハイフン開始不可
+name: pdf--processing     # 連続ハイフン不可
+name: anthropic-helper    # 予約語（anthropic, claude）不可
+```
 
 ### Skillのサイズ
 
 - SKILL.md: **500行以下**が最適
 - 詳細情報は別ファイルに分割
-- リンクは1段階まで
+- リンクは1段階まで（A→B→Cは避ける）
+- Unixスタイルパスを使用: `scripts/helper.py`
 
 ### ツール権限の設計
 
@@ -538,6 +562,39 @@ allowed-tools: Read, Grep, Glob
 # 修正が必要な場合のみEdit/Writeを追加
 allowed-tools: Read, Edit, Write, Bash(git:*)
 ```
+
+### 簡潔さが鍵
+
+**デフォルトの前提: Claudeは既に非常に賢い**
+
+追加すべきは「Claudeが持っていない」コンテキストのみ。各情報に対して問いかける：
+- 「Claudeは本当にこの説明が必要か？」
+- 「この段落はトークンコストに見合うか？」
+
+**悪い例（冗長）:**
+```markdown
+PDF (Portable Document Format) files are a common file format that contains
+text, images, and other content. To extract text from a PDF, you'll need to
+use a library. There are many libraries available...
+```
+
+**良い例（簡潔）:**
+```markdown
+## Extract PDF text
+
+Use pdfplumber for text extraction:
+import pdfplumber
+with pdfplumber.open("file.pdf") as pdf:
+    text = pdf.pages[0].extract_text()
+```
+
+### 適切な自由度の設定
+
+| 自由度 | 使用場面 | 例 |
+|-------|---------|-----|
+| **高** | 複数アプローチが有効 | コードレビュー手順 |
+| **中** | 推奨パターンがあるが変更可 | レポート生成テンプレート |
+| **低** | 一貫性が重要 | DBマイグレーション |
 
 ### ドキュメント化
 
@@ -553,6 +610,152 @@ git add .claude/skills/
 git commit -m "Add code-review skill"
 git push
 ```
+
+---
+
+## 12. Progressive Disclosure パターン
+
+Skillsの最も重要な設計原則。マニュアルの目次→章→付録のように、必要な情報だけを段階的にロードする。
+
+### 3層構造
+
+```
+Layer 1: メタデータ（name + description）
+         → 常にプリロード（~100トークン）
+
+Layer 2: SKILL.md本文
+         → Skill発動時にロード（5000トークン以下推奨）
+
+Layer 3+: 参照ファイル（references/, scripts/等）
+         → 必要に応じてオンデマンドロード（無制限）
+```
+
+### パターン1: 高レベルガイド + 参照
+
+```markdown
+## Advanced features
+
+**Form filling**: See [FORMS.md](FORMS.md) for complete guide
+**API reference**: See [REFERENCE.md](REFERENCE.md) for all methods
+**Examples**: See [EXAMPLES.md](EXAMPLES.md) for common patterns
+```
+
+### パターン2: ドメイン別組織化
+
+```markdown
+## Available datasets
+
+**Finance**: Revenue, ARR, billing → See [references/finance.md](references/finance.md)
+**Sales**: Opportunities, pipeline → See [references/sales.md](references/sales.md)
+```
+
+### パターン3: 条件分岐
+
+```markdown
+## Document modification workflow
+
+**Creating new content?** → Follow "Creation workflow" below
+**Editing existing content?** → Follow "Editing workflow" below
+```
+
+---
+
+## 13. アンチパターン（避けるべきこと）
+
+### 選択肢の過剰提示
+
+```markdown
+# 悪い例
+"You can use pypdf, or pdfplumber, or PyMuPDF, or pdf2image, or..."
+
+# 良い例
+"Use pdfplumber for text extraction:
+[コード例]
+For scanned PDFs requiring OCR, use pdf2image with pytesseract instead."
+```
+
+### 時間依存の情報
+
+```markdown
+# 悪い例
+"If you're doing this before August 2025, use the old API."
+
+# 良い例
+## Current method
+Use the v2 API endpoint: `api.example.com/v2/messages`
+
+## Old patterns
+<details>
+<summary>Legacy v1 API (deprecated 2025-08)</summary>
+[旧情報]
+</details>
+```
+
+### 含めるべきでないファイル
+
+以下の補助的ドキュメントは**作成しない**：
+- README.md
+- INSTALLATION_GUIDE.md
+- QUICK_REFERENCE.md
+- CHANGELOG.md
+
+Skillには「AIエージェントがタスクを実行するために必要な情報」のみを含める。
+
+---
+
+## 14. 評価と反復
+
+### 評価駆動開発
+
+1. **ギャップを特定**: Skillなしで代表的タスクを実行、失敗を記録
+2. **評価を作成**: ギャップをテストする3つのシナリオを構築
+3. **ベースラインを確立**: Skillなしのパフォーマンスを測定
+4. **最小限の指示を書く**: ギャップを埋め、評価をパスする最小限のコンテンツ
+5. **反復**: 評価実行、ベースライン比較、改善
+
+### テストチェックリスト
+
+- [ ] Haiku、Sonnet、Opusでテスト
+- [ ] 最低3つの評価シナリオを作成
+- [ ] 実際の使用シナリオでテスト
+
+---
+
+## 15. 公式リソース
+
+### Anthropic公式Skillsリポジトリ
+
+```
+anthropics/skills/
+├── skills/
+│   ├── Creative & Design/
+│   ├── Development & Technical/
+│   ├── Enterprise & Communication/
+│   └── Document Skills/
+├── spec/                    # Agent Skills仕様
+├── template-skill/          # テンプレート
+└── README.md
+```
+
+**公式Skill一覧:**
+
+| Skill | 説明 |
+|-------|------|
+| `pdf` | PDFの操作、テキスト抽出、フォーム入力 |
+| `docx` | Word文書の作成・編集 |
+| `pptx` | PowerPointプレゼンテーション |
+| `xlsx` | Excelスプレッドシート |
+| `skill-creator` | 新しいSkillの作成ガイド |
+
+### リンク一覧
+
+| リソース | URL |
+|---------|-----|
+| Claude Code Skills Docs | https://code.claude.com/docs/en/skills |
+| Skill Authoring Best Practices | https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices |
+| Agent Skills Specification | https://agentskills.io/specification |
+| Anthropic公式Skillsリポジトリ | https://github.com/anthropics/skills |
+| Introducing Agent Skills | https://www.anthropic.com/news/skills |
 
 ---
 

@@ -281,6 +281,45 @@ description: コードレビュー、PR確認、品質チェックが必要な�
 
 ユーザーが「レビュー」「品質チェック」などのキーワードを使うと自動選択されます。
 
+### Background Tasks & Async Agents
+
+v2.0.64以降、サブエージェントをバックグラウンドで実行し、メインエージェントで別タスクを継続可能。
+
+#### 機能
+
+| 機能 | 説明 |
+|-----|------|
+| 非同期実行 | タスクIDを返して即座に次のプロンプトに対応 |
+| Background Agents | サブエージェントをバックグラウンド化 |
+| プロセス永続化 | セッション間でプロセス継続 |
+| 自動クリーンアップ | Claude Code終了時に自動終了 |
+
+#### 使用方法
+
+Taskツールで `run_in_background: true` を指定：
+
+```json
+{
+  "description": "Run tests in background",
+  "prompt": "Execute all unit tests",
+  "run_in_background": true
+}
+```
+
+#### タスク管理
+
+| コマンド/ツール | 用途 |
+|---------------|------|
+| `/tasks` | 実行中タスクの確認 |
+| `TaskOutput` | タスク出力の取得 |
+| `KillShell` | バックグラウンドシェルの終了 |
+
+#### 無効化
+
+```bash
+export CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1
+```
+
 ---
 
 ## 7. ベストプラクティス

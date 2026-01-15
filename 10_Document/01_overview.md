@@ -95,6 +95,132 @@ description: Claude Codeのカスタマイズ機能の全体概要と使い分�
 | **Settings** | JSON | × |
 | **CLAUDE.md** | Markdown | × |
 
+### Skills vs Slash Commands 詳細比較
+
+この2つは混同しやすいため、詳細に比較します。
+
+#### 基本的な違い
+
+| 側面 | Slash Commands | Skills |
+|------|----------------|--------|
+| **呼び出し** | 明示的（`/command`と入力） | 自動（Claudeが判断して発動） |
+| **ファイル構造** | 単一の`.md`ファイル | ディレクトリ＋複数ファイル |
+| **複雑度** | シンプルなプロンプト | 複数ファイル、スクリプト対応 |
+| **検出方法** | ユーザーがコマンド名を知っている必要あり | descriptionから意味的にマッチ |
+| **主な用途** | 頻繁に使うテンプレート | 専門的な能力・ワークフロー |
+
+#### 詳細比較表
+
+| 項目 | Slash Commands | Skills |
+|------|----------------|--------|
+| **保存場所（個人）** | `~/.claude/commands/*.md` | `~/.claude/skills/*/SKILL.md` |
+| **保存場所（プロジェクト）** | `.claude/commands/*.md` | `.claude/skills/*/SKILL.md` |
+| **必須ファイル** | `command-name.md` | `SKILL.md` |
+| **サポートファイル** | なし | 複数可（*.md, scripts/等） |
+| **メタデータ（必須）** | `description` | `name`, `description` |
+| **メタデータ（任意）** | `argument-hint`, `allowed-tools`, `model` | `allowed-tools`, `model` |
+| **引数サポート** | あり（`$ARGUMENTS`, `$1`, `$2`...） | なし |
+| **動的コンテンツ** | あり（`!`バッククォート実行`!`） | なし |
+| **ファイル参照** | あり（`@path/to/file`） | あり（相対リンク） |
+| **読み込みタイミング** | `/command`実行時 | description常時 → 発動時に全体 |
+| **ユーザー確認** | なし（即実行） | あり（使用許可を確認） |
+| **サブディレクトリ** | 可（ネームスペース） | 不可（1階層のみ） |
+| **推奨サイズ** | 制限なし | SKILL.md 500行以下 |
+| **Progressive Disclosure** | 非対応 | 対応（参照ファイル分割） |
+| **Skill連携** | Skillをトリガー可能 | 他Skillを参照可能 |
+
+#### 機能マトリクス
+
+| 機能 | Slash Commands | Skills |
+|:-----|:-------------:|:------:|
+| プロンプトテンプレート | ✅ | ✅ |
+| 自動検出・発動 | ❌ | ✅ |
+| 複数ファイル構成 | ❌ | ✅ |
+| スクリプト同梱 | ❌ | ✅ |
+| 引数受け取り | ✅ | ❌ |
+| シェルコマンド埋め込み | ✅ | ❌ |
+| ツール制限 | ✅ | ✅ |
+| モデル指定 | ✅ | ✅ |
+| チーム共有（Git） | ✅ | ✅ |
+| Plugin配布 | ✅ | ✅ |
+
+#### ファイル構造の違い
+
+```
+# Slash Command（1ファイル）
+.claude/commands/review.md
+
+# Skill（ディレクトリ）
+.claude/skills/code-review/
+├── SKILL.md           # 必須：メタデータと指示
+├── SECURITY.md        # オプション：詳細資料
+├── PERFORMANCE.md     # オプション：詳細資料
+└── scripts/
+    └── run-linters.sh # オプション：スクリプト
+```
+
+#### 使い分けの判断基準
+
+**Slash Commands を選ぶ場合:**
+- 同じプロンプトを頻繁に入力している
+- 短い定型コマンド（`/review`, `/test`, `/deploy`）
+- 単一ファイルで完結する処理
+- ユーザーが明示的に実行タイミングを決めたい
+
+**Skills を選ぶ場合:**
+- 複数手順を含む複雑なワークフロー
+- 参考資料やスクリプトが必要
+- チーム標準を自動適用したい
+- 「○○して」と言うだけで発動させたい（自動検出）
+
+#### 実例比較
+
+**同じ「コードレビュー」を実現する場合:**
+
+```markdown
+# Slash Command版: .claude/commands/review.md
+---
+description: コードをレビュー
+---
+
+このコードを以下の観点からレビュー：
+- セキュリティ問題
+- パフォーマンス問題
+- コードスタイル違反
+```
+→ 使用方法: `/review` と入力
+
+```markdown
+# Skill版: .claude/skills/code-review/SKILL.md
+---
+name: code-review
+description: コード品質と潜在的問題をチェック。PRレビュー、コード分析が必要なときに使用。
+---
+
+# コードレビュースキル
+
+詳細は以下を参照:
+- [セキュリティチェックリスト](SECURITY.md)
+- [パフォーマンスパターン](PERFORMANCE.md)
+```
+→ 使用方法: 「このコードをレビューして」と言うだけ
+
+#### 併用パターン
+
+両方を組み合わせることも可能：
+
+1. **Skill**: 詳細なレビューロジックと参照資料を定義
+2. **Slash Command**: `/review` でSkillを明示的にトリガー
+
+```markdown
+# .claude/commands/review.md
+---
+description: code-review Skillを使ってレビューを実行
+---
+
+code-review Skillを使って、現在のファイルをレビューしてください。
+```
+
 ---
 
 ## ファイル構造
@@ -250,6 +376,10 @@ Plugin（最低優先）
 | 09 | [09_windows-tips.md](09_windows-tips.md) | Windows環境でのClaude Code利用 |
 | 10 | [10_progressive-disclosure.md](10_progressive-disclosure.md) | Progressive Disclosure（段階的開示） |
 | 11 | [11_agent-best-practices.md](11_agent-best-practices.md) | Anthropic公式エージェントベストプラクティス |
+| 12 | [12_mcp-development.md](12_mcp-development.md) | MCP Server開発ガイド |
+| 13 | [13_headless-cicd.md](13_headless-cicd.md) | Headless Mode & CI/CD統合 |
+| 14 | [14_extended-thinking.md](14_extended-thinking.md) | Extended Thinking（拡張思考） |
+| 15 | [15_agent-sdk.md](15_agent-sdk.md) | Claude Agent SDK |
 
 ### MCP関連（mcp/）
 

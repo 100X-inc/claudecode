@@ -148,6 +148,72 @@ paths:
 テストは describe/it 形式で記述...
 ```
 
+## Context Engineering上級テクニック
+
+コンテキストウィンドウは有限リソース。トークン数が増えると推論品質が低下するため、戦略的な管理が必要。
+
+### Compaction（圧縮）
+
+コンテキスト上限に近づいた時、会話を要約して重要な決定事項のみ保持:
+
+```
+会話履歴 (50K tokens) → Compaction → 要約 (5K tokens)
+                         ↓
+                    重要な決定事項
+                    コードスニペット
+                    エラー情報
+```
+
+**保持すべき情報:** 重要な決定、発見したバグ、詳細な計画
+**破棄してよい情報:** 冗長な出力、探索的な会話
+
+### Structured Note-Taking
+
+コンテキストウィンドウ外の永続メモリファイルを活用:
+
+```markdown
+# session-notes.md
+
+## 決定事項
+- 認証方式: JWT
+- DB: PostgreSQL
+
+## 未解決
+- キャッシュ戦略
+
+## 次のステップ
+1. API設計
+2. テスト作成
+```
+
+### Just-in-Time Loading
+
+事前にすべてのデータをロードせず、必要時にツール経由で動的取得:
+
+```
+❌ 悪い例: 全ファイルを最初にコンテキストに含める
+✅ 良い例: 必要になった時点でRead/Grepツールで取得
+```
+
+### Sub-Agent Architecture
+
+専門エージェントが焦点を絞ったタスクを処理し、凝縮した結果を返す:
+
+```
+Main Agent
+    ├── Code Review Agent → "3件の問題を発見"
+    ├── Test Agent → "全テストパス"
+    └── Security Agent → "脆弱性なし"
+```
+
+### 効果測定データ
+
+Anthropic研究によると:
+- Context editing + Memory tool = **39%のパフォーマンス向上**
+- GitHub Copilot事例: Progressive Disclosure で **54%のトークン削減**
+
+---
+
 ## ベストプラクティス
 
 ### サイズガイドライン
