@@ -7,6 +7,7 @@
 | ファイル | 概要 |
 |---------|------|
 | `claude-code-gaps-2026.md` | 10_Documentで不足している重要概念の調査レポート |
+| `codex-exec-plans.md` | OpenAI Codex ExecPlans (PLANS.md) 調査 |
 
 ## 用途
 - 自分で行った技術検証

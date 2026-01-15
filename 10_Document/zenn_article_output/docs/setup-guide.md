@@ -170,17 +170,112 @@ on:
 
 ## MCP ツール詳細
 
-### mcp__github_inline_comment__create_inline_comment
+### GitHub Inline Comment MCP Server
 
-PRの特定行にインラインコメントを投稿するMCPツール。
+`claude-code-action` には **GitHub Inline Comment MCP Server** が内蔵されています。このMCPサーバーにより、PRの特定行にインラインコメントを投稿できます。
 
-**初期化条件**:
-- PRコンテキストが必須
-- `--allowedTools` に明示的に指定が必要
+**ソースコード**: [github-inline-comment-server.ts](https://github.com/anthropics/claude-code-action/blob/v1.0.21/src/mcp/github-inline-comment-server.ts)
 
-**既知の問題**:
-- `workflow_dispatch` トリガーでは初期化されない（Issue #635）
-- `mcp__github` 単体では有効化されない（Issue #723）
+#### アーキテクチャ
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                  claude-code-action                          │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │           GitHub Inline Comment MCP Server           │    │
+│  │                                                      │    │
+│  │  環境変数:                                           │    │
+│  │  - REPO_OWNER    (自動設定)                         │    │
+│  │  - REPO_NAME     (自動設定)                         │    │
+│  │  - PR_NUMBER     (自動設定)                         │    │
+│  │  - GITHUB_TOKEN  (自動設定)                         │    │
+│  │                                                      │    │
+│  │  ツール: create_inline_comment                       │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                           │                                  │
+│                           ▼                                  │
+│                    GitHub API                                │
+│              (pulls.createReviewComment)                     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### ツール名
+
+```
+mcp__github_inline_comment__create_inline_comment
+```
+
+#### パラメータ
+
+| パラメータ | 型 | 必須 | 説明 |
+|-----------|-----|------|------|
+| `path` | string | ✅ | コメント対象のファイルパス（例: `src/index.js`） |
+| `body` | string | ✅ | コメント本文（Markdown対応、コード提案ブロック対応） |
+| `line` | number | ※ | 単一行コメントの行番号、または複数行の終了行 |
+| `startLine` | number | - | 複数行コメントの開始行 |
+| `side` | "LEFT" \| "RIGHT" | - | diff のどちら側か（デフォルト: RIGHT） |
+| `commit_id` | string | - | 特定のコミットSHA（デフォルト: 最新コミット） |
+
+※ `line` または `startLine` のいずれかが必須
+
+#### コード提案ブロック
+
+コメント本文に以下の形式で記述すると、GitHubの「提案を適用」ボタンが表示されます：
+
+````markdown
+```suggestion
+修正後のコード
+```
+````
+
+**重要**: 提案ブロックは指定した行範囲を**完全に置換**します。構文的に正しい完全なコードを提供してください。
+
+#### 使用例
+
+**単一行コメント:**
+```json
+{
+  "path": "src/utils/helper.ts",
+  "body": "この変数名は `userData` の方が明確です。",
+  "line": 42
+}
+```
+
+**複数行コメント（コード提案付き）:**
+````json
+{
+  "path": "src/api/handler.ts",
+  "body": "N+1クエリの問題があります。以下のように修正してください：\n\n```suggestion\nconst users = await User.findAll({ include: [Profile] });\n```",
+  "startLine": 15,
+  "line": 18
+}
+````
+
+#### 有効化方法
+
+`claude-review.yml` で明示的に許可が必要です：
+
+```yaml
+claude_args: |
+  --allowedTools "mcp__github_inline_comment__create_inline_comment"
+```
+
+#### 初期化条件
+
+- **PRコンテキストが必須**: `pull_request` または `issue_comment`（PR上）トリガーで実行
+- **`--allowedTools` に明示的指定が必要**: `mcp__github` だけでは有効化されない
+
+#### 既知の問題
+
+| Issue | 内容 |
+|-------|------|
+| [#635](https://github.com/anthropics/claude-code-action/issues/635) | `workflow_dispatch` トリガーではMCPが初期化されない |
+| [#723](https://github.com/anthropics/claude-code-action/issues/723) | `mcp__github` 単体では有効化されない |
+
+#### セキュリティ
+
+- コメント本文は自動的にサニタイズされ、GitHubトークンが含まれていても除去されます
+- PRの承認（approve）機能は意図的に除外されており、Claudeが誤ってPRを承認することを防いでいます
 
 ## 参考リンク
 
