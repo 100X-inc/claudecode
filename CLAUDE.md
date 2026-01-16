@@ -28,6 +28,7 @@ Claude Codeの拡張機能（Skills, Hooks, Slash Commands, Agents, MCP等）に
 - [08_settings.md](10_Document/08_settings.md) - Settings・Permissions
 - [09_windows-tips.md](10_Document/09_windows-tips.md) - Windows環境での注意点
 - [11_agent-best-practices.md](10_Document/11_agent-best-practices.md) - Anthropic公式エージェントベストプラクティス
+- [16_antigravity-best-practices.md](10_Document/16_antigravity-best-practices.md) - Google Antigravityベストプラクティス
 
 インデックス: [01_IndexNote/README.md](01_IndexNote/README.md)
 

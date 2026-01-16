@@ -31,6 +31,7 @@ Claude Code 公式ドキュメント・リファレンス。
 | `13_headless-cicd.md` | Headless Mode & CI/CD統合 |
 | `14_extended-thinking.md` | Extended Thinking |
 | `15_agent-sdk.md` | Claude Agent SDK |
+| `16_antigravity-best-practices.md` | Google Antigravityベストプラクティス |
 
 ### MCP関連
 | ファイル | 概要 |
