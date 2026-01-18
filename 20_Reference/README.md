@@ -20,6 +20,7 @@
 | `agent-memory-skill.md` | Agent Memory Skill の解説 |
 | `slack-integration-design.md` | Slack連携の設計 |
 | `ClaudeCodeを使ったhooks.md` | Hooks + Slack通知の実装例 |
+| `code-simplifier-agent.md` | Code-Simplifier Agent（公式プラグイン） |
 
 ## 運用ルール
 - ソースURLを明記する

@@ -1,0 +1,17 @@
+{
+  "name": "x-reader",
+  "version": "1.0.0",
+  "description": "Read X (Twitter) posts using Playwright with persistent profile",
+  "type": "module",
+  "bin": {
+    "x-reader": "./cli.js",
+    "x-login": "./login-cli.js"
+  },
+  "scripts": {
+    "login": "node login.js",
+    "read": "node read-post.js"
+  },
+  "dependencies": {
+    "playwright": "^1.56.1"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "_comment": "tmux マルチエージェント連携用 Hooks 設定例",
+  "_usage": "この内容を ~/.claude/settings.json または .claude/settings.json の hooks セクションにマージしてください",
+
+  "hooks": {
+    "PostToolUse": [
+      {
+        "_comment": "Edit ツール使用後に自動レビュー依頼",
+        "matcher": "Edit",
+        "command": "bash 90_Tools/tmux-multi-agent/review-loop.sh"
+      },
+      {
+        "_comment": "Write ツール使用後にも自動レビュー依頼",
+        "matcher": "Write",
+        "command": "bash 90_Tools/tmux-multi-agent/review-loop.sh"
+      }
+    ],
+
+    "Stop": [
+      {
+        "_comment": "Claude Code 作業完了時に通知",
+        "command": "echo '=== Claude Code 作業完了 ===' && bash 90_Tools/tmux-multi-agent/send-to-pane.sh 1 '実装が完了しました。最終レビューをお願いします。'"
+      }
+    ],
+
+    "PreToolUse": [
+      {
+        "_comment": "Edit 前に Codex に通知（オプション）",
+        "matcher": "Edit",
+        "command": "bash 90_Tools/tmux-multi-agent/send-to-pane.sh 1 '編集を開始します...'"
+      }
+    ]
+  }
+}
